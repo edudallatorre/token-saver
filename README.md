@@ -130,7 +130,7 @@ For questions or customizations, contact your development team.
 ---
 
 **Version:** 1.0.0
-**Last Updated:** 2025
+**Last Updated:** 2026
 **License:** Proprietary
 
-© 2025 TokenSaver AI. All rights reserved.
+© 2026 TokenSaver AI. All rights reserved.
