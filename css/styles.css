@@ -9,6 +9,7 @@ body {
     background: #0a0e1a;
     color: #ffffff;
     overflow: hidden;
+    max-width: 100vw;
 }
 
 /* Sidebar */
@@ -320,6 +321,7 @@ body {
     min-width: 360px;
     max-height: 480px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .notifications-header {
@@ -436,11 +438,13 @@ body {
     height: calc(100vh - 64px);
     overflow-y: auto;
     overflow-x: hidden;
+    max-width: calc(100vw - 200px);
 }
 
 .page {
     display: none;
     animation: fadeIn 0.3s ease;
+    max-width: 100%;
 }
 
 .page.active {
@@ -704,6 +708,7 @@ td {
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
+    overflow-x: hidden;
     animation: slideUp 0.3s ease;
 }
 
@@ -928,6 +933,7 @@ td {
     .main-content {
         margin-left: 0;
         padding: 16px;
+        max-width: 100vw;
     }
 
     .user-name {

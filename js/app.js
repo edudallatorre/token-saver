@@ -3,64 +3,96 @@ const navLinks = document.querySelectorAll('.nav-link');
 const pages = document.querySelectorAll('.page');
 
 function formatNumber(value) {
-    return value.toLocaleString('en-GB');
+    return (Number(value) || 0).toLocaleString('en-GB');
 }
 
 function formatCompact(value) {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(2)}M`;
-    if (value >= 1000) return `${Math.round(value / 1000)}K`;
-    return String(value);
+    const numericValue = Number(value) || 0;
+    if (numericValue >= 1000000) return `${(numericValue / 1000000).toFixed(2)}M`;
+    if (numericValue >= 1000) return `${Math.round(numericValue / 1000)}K`;
+    return String(numericValue);
 }
 
 function formatCurrency(value) {
-    return `&pound;${value.toFixed(2)}`;
+    return `&pound;${(Number(value) || 0).toFixed(2)}`;
+}
+
+function formatSignedPercent(value) {
+    const numericValue = Number(value) || 0;
+    return `${numericValue >= 0 ? '+' : ''}${numericValue.toFixed(1)}%`;
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+}
+
+function setHTML(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.innerHTML = value;
+}
+
+function createEmptyState(title, message) {
+    return `
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-circle-info"></i></div>
+            <h3>${title}</h3>
+            <p>${message}</p>
+        </div>
+    `;
 }
 
 function statusText(status) {
     if (status === 'critical') return 'Failed';
     if (status === 'warning') return 'Watch';
+    if (status === 'applied') return 'Applied';
+    if (status === 'recommended') return 'Recommended';
     return 'Active';
+}
+
+function riskStatus(risk) {
+    if (risk === 'low') return 'success';
+    if (risk === 'medium') return 'warning';
+    return 'critical';
+}
+
+function severityText(severity) {
+    if (severity === 'critical') return 'Critical';
+    if (severity === 'warning') return 'Watch';
+    return 'Low';
+}
+
+function getProjectAgents(projectName) {
+    const agents = Array.isArray(TokenSaverData?.agents) ? TokenSaverData.agents : [];
+    return agents.filter(agent => agent.project === projectName);
 }
 
 function renderSharedDashboardData() {
     if (typeof TokenSaverData === 'undefined') return;
 
-    const overview = TokenSaverData.metrics.overview;
-    document.getElementById('overviewTotalTokens').textContent = formatCompact(overview.totalTokens);
-    document.getElementById('overviewEstimatedCost').innerHTML = formatCurrency(overview.estimatedCost);
-    document.getElementById('overviewRequests').textContent = formatNumber(overview.requests);
-    document.getElementById('overviewTokensSaved').textContent = formatCompact(overview.tokensSaved);
+    const overview = TokenSaverData.metrics?.overview || {};
+    setText('overviewTotalTokens', formatCompact(overview.totalTokens));
+    setHTML('overviewEstimatedCost', formatCurrency(overview.estimatedCost));
+    setText('overviewRequests', formatNumber(overview.requests));
+    setText('overviewTokensSaved', formatCompact(overview.tokensSaved));
 
     const agentsTableBody = document.getElementById('agentsTableBody');
+    const agents = Array.isArray(TokenSaverData.agents) ? TokenSaverData.agents : [];
     if (agentsTableBody) {
-        agentsTableBody.innerHTML = TokenSaverData.agents.map(agent => `
+        agentsTableBody.innerHTML = agents.length ? agents.map(agent => `
             <tr>
-                <td><strong>${agent.name}</strong></td>
-                <td>${agent.type}</td>
-                <td><span class="status-badge ${agent.status}">${statusText(agent.status)}</span></td>
+                <td><strong>${agent.name || 'Untitled Agent'}</strong></td>
+                <td>${agent.type || 'Unclassified'}</td>
+                <td><span class="status-badge ${agent.status || 'success'}">${statusText(agent.status)}</span></td>
                 <td>${formatNumber(agent.requests24h)}</td>
                 <td>${formatCurrency(agent.cost24h)}</td>
                 <td>
-                    <button class="action-btn secondary" onclick="openConfigModal('${agent.name}')">Configure</button>
+                    <button class="action-btn secondary" onclick="openConfigModal('${agent.name || 'Untitled Agent'}')">Configure</button>
                 </td>
             </tr>
-        `).join('');
+        `).join('') : `<tr><td colspan="6">${createEmptyState('No agents configured', 'Create an agent to start tracking requests, latency and token usage.')}</td></tr>`;
     }
 
-    const projectsTableBody = document.getElementById('projectsTableBody');
-    if (projectsTableBody) {
-        projectsTableBody.innerHTML = TokenSaverData.projects.map(project => `
-            <tr>
-                <td><strong>${project.name}</strong></td>
-                <td>${project.agents.length} ${project.agents.length === 1 ? 'agent' : 'agents'}</td>
-                <td><span class="status-badge ${project.status}">${statusText(project.status)}</span></td>
-                <td>${formatCurrency(project.cost24h)}</td>
-                <td>
-                    <button class="action-btn secondary" onclick="showToast('Project View', 'Opening ${project.name} details...', 'info')">View</button>
-                </td>
-            </tr>
-        `).join('');
-    }
 }
 
 renderSharedDashboardData();
