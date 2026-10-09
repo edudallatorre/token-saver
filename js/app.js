@@ -428,3 +428,187 @@ function handleLogout() {
 
 // Check auth on load
 window.addEventListener('load', checkAuth);
+
+// Alerts Page Functions
+function openCreateAlertModal() {
+    const bodyHTML = `
+        <div class="form-group">
+            <label class="form-label">Alert Name</label>
+            <input type="text" class="form-input" placeholder="Enter alert rule name" id="alertName">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Condition</label>
+            <select class="form-select" id="alertCondition">
+                <option value="">Select condition</option>
+                <option value="cost">Cost exceeds</option>
+                <option value="tokens">Token usage exceeds</option>
+                <option value="latency">Latency exceeds</option>
+                <option value="error">Error rate exceeds</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Threshold</label>
+            <input type="text" class="form-input" placeholder="e.g., 100, 5%" id="alertThreshold">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Scope</label>
+            <select class="form-select" id="alertScope">
+                <option value="all">All agents</option>
+                <option value="per-agent">Per agent</option>
+                <option value="per-project">Per project</option>
+            </select>
+        </div>
+    `;
+
+    openModal('Create New Alert Rule', bodyHTML, () => {
+        const name = document.getElementById('alertName').value;
+        const condition = document.getElementById('alertCondition').value;
+        if (name && condition) {
+            showToast('Alert Created', `${name} alert rule has been created successfully!`, 'success');
+        } else {
+            showToast('Error', 'Please fill in all required fields', 'error');
+        }
+    });
+}
+
+function acknowledgeAlert(alertId) {
+    showToast('Alert Acknowledged', `Alert #${alertId} has been acknowledged`, 'success');
+}
+
+function editAlertRule(ruleId) {
+    showToast('Edit Alert Rule', `Opening editor for ${ruleId} rule...`, 'info');
+}
+
+// Settings Page Functions
+function saveAccountSettings() {
+    const fullName = document.getElementById('settingsFullName').value;
+    const email = document.getElementById('settingsEmail').value;
+
+    if (fullName && email) {
+        showToast('Settings Saved', 'Your account settings have been updated successfully!', 'success');
+    } else {
+        showToast('Error', 'Please fill in all required fields', 'error');
+    }
+}
+
+function copyApiKey(keyType) {
+    const keys = {
+        'prod': 'ts_live_abc123xyz',
+        'dev': 'ts_test_def456abc',
+        'staging': 'ts_test_ghi789def'
+    };
+
+    const key = keys[keyType];
+    if (key) {
+        navigator.clipboard.writeText(key).then(() => {
+            showToast('API Key Copied', `${keyType} API key copied to clipboard`, 'success');
+        }).catch(() => {
+            showToast('Error', 'Failed to copy API key', 'error');
+        });
+    }
+}
+
+function revokeApiKey(keyType) {
+    if (confirm(`Are you sure you want to revoke the ${keyType} API key? This action cannot be undone.`)) {
+        showToast('API Key Revoked', `${keyType} API key has been revoked`, 'success');
+    }
+}
+
+function generateNewApiKey() {
+    const bodyHTML = `
+        <div class="form-group">
+            <label class="form-label">Key Name</label>
+            <input type="text" class="form-input" placeholder="Enter a name for this API key" id="newApiKeyName">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Environment</label>
+            <select class="form-select" id="newApiKeyEnv">
+                <option value="live">Production (live)</option>
+                <option value="test">Development/Testing</option>
+            </select>
+        </div>
+    `;
+
+    openModal('Generate New API Key', bodyHTML, () => {
+        const name = document.getElementById('newApiKeyName').value;
+        const env = document.getElementById('newApiKeyEnv').value;
+        if (name) {
+            showToast('API Key Generated', `New ${env} API key "${name}" has been generated`, 'success');
+        } else {
+            showToast('Error', 'Please enter a key name', 'error');
+        }
+    });
+}
+
+function saveNotificationSettings() {
+    showToast('Settings Saved', 'Your notification preferences have been updated successfully!', 'success');
+}
+
+function viewBillingHistory() {
+    showToast('Billing History', 'Opening billing history and invoices...', 'info');
+}
+
+function managePlan() {
+    showToast('Manage Plan', 'Opening plan management...', 'info');
+}
+
+function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast('Error', 'Please fill in all password fields', 'error');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showToast('Error', 'New passwords do not match', 'error');
+        return;
+    }
+
+    if (newPassword.length < 8) {
+        showToast('Error', 'Password must be at least 8 characters long', 'error');
+        return;
+    }
+
+    showToast('Password Changed', 'Your password has been updated successfully!', 'success');
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+}
+
+function enable2FA() {
+    showToast('Enable 2FA', 'Opening two-factor authentication setup...', 'info');
+}
+
+function revokeSession(sessionId) {
+    if (confirm('Are you sure you want to revoke this session?')) {
+        showToast('Session Revoked', `${sessionId} session has been terminated`, 'success');
+    }
+}
+
+function saveGeneralSettings() {
+    showToast('Settings Saved', 'Your general preferences have been updated successfully!', 'success');
+}
+
+function exportAllData() {
+    if (confirm('This will prepare a complete export of all your data. Continue?')) {
+        showToast('Export Started', 'Your data export is being prepared. You will receive an email when ready.', 'success');
+    }
+}
+
+function deleteHistoricalData() {
+    if (confirm('WARNING: This will permanently delete all historical usage data. Are you absolutely sure?')) {
+        showToast('Data Deletion Scheduled', 'Historical data deletion has been scheduled', 'info');
+    }
+}
+
+function deleteAccount() {
+    const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+    if (confirmation === 'DELETE') {
+        showToast('Account Deletion', 'Your account deletion request has been submitted', 'error');
+    } else if (confirmation !== null) {
+        showToast('Cancelled', 'Account deletion cancelled', 'info');
+    }
+}
